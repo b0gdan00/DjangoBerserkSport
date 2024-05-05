@@ -67,8 +67,8 @@ class OfferType(models.Model):
     class Meta:
         verbose_name_plural = "Типи товарів"
 
-    name_ua  = models.CharField(max_length=255)
-    name_ru  = models.CharField(max_length=255)
+    name_ua  = models.CharField(max_length=255, unique=True)
+    name_ru  = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
         return self.name_ua
@@ -110,19 +110,19 @@ class Parametr(models.Model):
     def __str__(self) -> str:
         return self.parametr_name
 
-class Image(models.Model):
+# class Image(models.Model):
 
-    class Meta:
-        verbose_name_plural = "Зображення"
+#     class Meta:
+#         verbose_name_plural = "Зображення"
 
-    url     = models.URLField(verbose_name="URL", unique=True)
+#     url     = models.URLField(verbose_name="URL")
 
-    def __str__(self) -> str:
-        return self.url
+#     def __str__(self) -> str:
+#         return self.url
+
 
 
 class Offer(models.Model):
-
     class Meta:
         verbose_name_plural = "Товари"
 
@@ -139,7 +139,7 @@ class Offer(models.Model):
     desc_ua     = models.TextField(verbose_name="Опис українською")
     price       = models.IntegerField(verbose_name="Ціна")
     stock       = models.IntegerField(verbose_name="Кількість")
-    images      = models.ManyToManyField(Image, verbose_name="Зображення")
+    images      = models.TextField(verbose_name="Зображення", null=True, blank=True)
     enable      = models.BooleanField(verbose_name="Статус", default=True)
 
     def parseModel(self, name):
@@ -152,6 +152,7 @@ class Offer(models.Model):
         self.model  = ' '.join(cleaned_words)
         pattern     = re.compile(fr"\b(?:{'|'.join(re.escape(s) for s in SIZES.split())})\b", flags=re.IGNORECASE)
         self.model  = pattern.sub("", self.model).strip()
+        self.model  = self.model.replace(",", "")
         self.model  = re.sub(r'\(\d+\)', '',  self.model)   
 
 

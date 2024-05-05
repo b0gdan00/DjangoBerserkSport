@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .models import Image, Offer, Category, OfferColor, Parametr, SIZE_CHOICES
+from .models import Offer, Category, OfferColor, Parametr, SIZE_CHOICES
 
 
 def parse_categories(xml_file_path):
@@ -56,11 +56,11 @@ def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
             offer.stock = int(offer_elem.find("stock_quantity").text) if int(offer_elem.find("stock_quantity").text) > 10  else 10
         except:
             print("Параметр відсутній", f"( {str(offer.offer_id)} )\t stock")
-        if True:    
-            [Image.objects.get_or_create(url=pic.text)[0] for pic in offer_elem.findall("picture")]
+        # if True:    
+        #     [Image.objects.get_or_create(url=pic.text)[0] for pic in offer_elem.findall("picture")]
             
-            for i in offer_elem.findall("picture"):
-                offer.images.add(Image.objects.get(url=i.text))
+        #     for i in offer_elem.findall("picture"):
+        #         offer.images.add(Image.objects.get(url=i.text))
         
         for param in offer_elem.findall(".//param"):
             if param.get("name") == "Цвет":
