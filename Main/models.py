@@ -2,6 +2,7 @@ from enum import Enum, auto
 import re
 from django.db import models
 from fuzzywuzzy import process
+from googletrans import Translator
 
 EXCLUDES    = [
     "black red pink dark gray grey white yellow blue green orange olive brown purple violet light multi",
@@ -81,8 +82,13 @@ class OfferColor(models.Model):
 
     color_en    = models.CharField(max_length=255, verbose_name="Колір англійською")
     color_ua    = models.CharField(max_length=255, verbose_name="Колір українською")
-    color_ru    = models.CharField(max_length=255, verbose_name="Колір російською")
+    color_ru    = models.CharField(max_length=255, verbose_name="Колір російською", blank=True, null=True)
 
+    def translate(self): return Translator().translate(self.color_ua, dest='ru').text.capitalize()
+
+    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields = ...) -> None:
+        return super().save(force_insert, force_update, using, update_fields)
+    
     def __str__(self) -> str:
         return self.color_ua
 
@@ -103,8 +109,8 @@ class Parametr(models.Model):
     class Meta:
         verbose_name_plural = "Параметри"
 
-    parametr_id    = models.BigIntegerField(verbose_name="Параметр айді", primary_key=True)
-    parametr_name  = models.CharField(verbose_name="Назва", choices=PARAMETR_CHOICES, max_length=1000, blank=False)
+    # parametr_id    = models.PositiveIntegerField(verbose_name="Параметр айді", primary_key=True)
+    parametr_name  = models.CharField(verbose_name="Назва", choices=PARAMETR_CHOICES, max_length=1000, blank=False, primary_key=True)
     parametr_value = models.CharField(verbose_name="Значення", max_length=1000, blank=False)
 
     def __str__(self) -> str:
@@ -162,12 +168,27 @@ class Offer(models.Model):
             if deeper: type_, score = process.extractOne(name.lower().split()[1], types) 
             else: type_, score = process.extractOne(name.lower().split()[0], types)
             if score > 70:
-                print(type_)
+                # print(type_)
                 self.offer_type = OfferType.objects.get(name_ua=type_.capitalize())
                 return True
             else: 
                 if not deeper: self.parseType(name, deeper=True)
                 else: return False
+
+    @staticmethod
+    def sortImages(images : list, article : str = None):
+        if not article: return "\n".join(images)
+        images = sorted(images)
+        for i in images:
+            if i.split("/")[-1] == article + "_1.jpg":
+                images.remove(i)
+                images.insert(0, i)
+            elif i.split("/")[-1] == article + "_2.jpg":
+                images.remove(i)
+                images.insert(1, i)
+        images = "\n".join(images)
+        return images
+
 
     def __str__(self) -> str:
 

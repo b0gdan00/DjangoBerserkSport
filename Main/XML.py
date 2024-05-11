@@ -16,7 +16,7 @@ def parse_categories(xml_file_path):
 def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
 
 
-    # if not categories: categories = parse_categories()
+    if not categories: categories = parse_categories(xml_file_path)
     
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
@@ -33,7 +33,6 @@ def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
         try:
             offer.category = Category.objects.get(id=int(offer_elem.find("categoryId").text))
         except:
-            print("Параметр відсутній", f"( {str(offer.offer_id)} )\t category")
             continue
             
         offer.parseModel(name=offer_elem.find("name_ua").text)
@@ -42,26 +41,17 @@ def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
 
         try:
             offer.desc = offer_elem.find("description").text.strip()
-        except:
-            print("Параметр відсутній", f"( {str(offer.offer_id)} )\t desc")
+        except:...
         try:
             offer.desc_ua = offer_elem.find("description_ua").text.strip()
-        except:
-            print("Параметр відсутній", f"( {str(offer.offer_id)} )\t desc_ua")
+        except:...
         try:
             offer.price = int(offer_elem.find("price").text)
-        except:
-            print("Параметр відсутній", f"( {str(offer.offer_id)} )\t price")
+        except:...
         try:
             offer.stock = int(offer_elem.find("stock_quantity").text) if int(offer_elem.find("stock_quantity").text) > 10  else 10
-        except:
-            print("Параметр відсутній", f"( {str(offer.offer_id)} )\t stock")
-        # if True:    
-        #     [Image.objects.get_or_create(url=pic.text)[0] for pic in offer_elem.findall("picture")]
-            
-        #     for i in offer_elem.findall("picture"):
-        #         offer.images.add(Image.objects.get(url=i.text))
-        
+        except:...
+
         for param in offer_elem.findall(".//param"):
             if param.get("name") == "Цвет":
                 try:offer.color = OfferColor.objects.get(color_ua=param.text)
@@ -71,7 +61,14 @@ def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
             elif param.get("name") == "Артикул":
                 offer.article = param.text
             # offer.parameters.add(Parametr.objects.get(name=param.get("name")), value=param.text)
-
+        
+        if True:    
+            offer.images = ""
+            images = []
+            for picture in offer_elem.findall("picture"):
+                if picture.text: images.append(picture.text)
+            if images: offer.images = offer.sortImages(images, article=offer.article)
+        
 
         offer.save()
     offers.append(offer)
