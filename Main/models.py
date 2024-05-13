@@ -80,14 +80,21 @@ class OfferColor(models.Model):
     class Meta:
         verbose_name_plural = "Кольори"
 
-    color_en    = models.CharField(max_length=255, verbose_name="Колір англійською")
+    color_en    = models.CharField(max_length=255, verbose_name="Колір англійською", unique=True)
     color_ua    = models.CharField(max_length=255, verbose_name="Колір українською")
     color_ru    = models.CharField(max_length=255, verbose_name="Колір російською", blank=True, null=True)
 
     def translate(self): return Translator().translate(self.color_ua, dest='ru').text.capitalize()
 
-    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields = ...) -> None:
-        return super().save(force_insert, force_update, using, update_fields)
+    def save(self, *args, **kwargs) -> None:
+
+        if not self.color_ru: self.color_ru = self.translate()
+        self.color_ru = self.color_ru.capitalize()
+        self.color_en = self.color_en.capitalize()
+        self.color_ua = self.color_ua.capitalize()
+
+        return super().save(*args, **kwargs)
+    
     
     def __str__(self) -> str:
         return self.color_ua
