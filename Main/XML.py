@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .models import Offer, Category, OfferColor, Parametr, SIZE_CHOICES
+from .models import Offer, Category, OfferColor
 
 
 def parse_categories(xml_file_path):
@@ -54,8 +54,9 @@ def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
 
         for param in offer_elem.findall(".//param"):
             if param.get("name") == "Цвет":
-                try:offer.color = OfferColor.objects.get(color_ua=param.text)
-                except: offer.color = OfferColor.objects.all().first()
+                # print(param.text)
+                offer.color = OfferColor.objects.get(color_ua=param.text)
+
             elif param.get("name") == "Размер":
                 offer.size = param.text
             elif param.get("name") == "Артикул":

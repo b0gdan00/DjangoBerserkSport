@@ -1,8 +1,11 @@
 from enum import Enum, auto
+import os
 import re
+from django.conf import settings
 from django.db import models
 from fuzzywuzzy import process
 from googletrans import Translator
+
 
 EXCLUDES    = [
     "black red pink dark gray grey white yellow blue green orange olive brown purple violet light multi",
@@ -30,6 +33,7 @@ SIZE_CHOICES = (
     ("M", "M"),
     ("L", "L"),
     ("XL", "XL"),
+    ("XS", "XS"),
     ("2XL", "2XL"),
     ("3XL", "3XL"),
     ("4XL", "4XL"),
@@ -69,7 +73,7 @@ class OfferType(models.Model):
         verbose_name_plural = "Типи товарів"
 
     name_ua  = models.CharField(max_length=255, unique=True)
-    name_ru  = models.CharField(max_length=255, unique=True)
+    name_ru  = models.CharField(max_length=255, unique=False)
 
     def __str__(self) -> str:
         return self.name_ua
@@ -111,17 +115,17 @@ class Category(models.Model):
     def __str__(self) -> str:
         return self.name
 
-class Parametr(models.Model):
+# class Parametr(models.Model):
 
-    class Meta:
-        verbose_name_plural = "Параметри"
+#     class Meta:
+#         verbose_name_plural = "Параметри"
 
-    # parametr_id    = models.PositiveIntegerField(verbose_name="Параметр айді", primary_key=True)
-    parametr_name  = models.CharField(verbose_name="Назва", choices=PARAMETR_CHOICES, max_length=1000, blank=False, primary_key=True)
-    parametr_value = models.CharField(verbose_name="Значення", max_length=1000, blank=False)
+#     # parametr_id    = models.PositiveIntegerField(verbose_name="Параметр айді", primary_key=True)
+#     name  = models.CharField(verbose_name="Назва", choices=PARAMETR_CHOICES, max_length=1000, blank=False, primary_key=True)
+#     value = models.CharField(verbose_name="Значення", max_length=1000, blank=False, choices=)
 
-    def __str__(self) -> str:
-        return self.parametr_name
+#     def __str__(self) -> str:
+#         return self.name
 
 # class Image(models.Model):
 
@@ -140,14 +144,14 @@ class Offer(models.Model):
         verbose_name_plural = "Товари"
 
     offer_id    = models.BigIntegerField(verbose_name="Офер айді", primary_key=True)
-    offer_type  = models.ForeignKey(OfferType, verbose_name="Тип товару", on_delete=models.CASCADE, blank=True, null=True)
+    offer_type  = models.ForeignKey(OfferType, verbose_name="Тип товару", on_delete=models.CASCADE)
     model       = models.CharField(verbose_name="Модель", max_length=1000)
-    size        = models.CharField(verbose_name="Розмір товару", max_length=255, choices=SIZE_CHOICES, blank=True)
+    size        = models.CharField(verbose_name="Розмір товару", max_length=255, choices=SIZE_CHOICES)
 
     category    = models.ForeignKey(Category, verbose_name="Категорія", on_delete=models.CASCADE)
     color       = models.ForeignKey(OfferColor, verbose_name="Колір", on_delete=models.CASCADE)
     article     = models.CharField(max_length=100, verbose_name="Артикл")
-    parameters  = models.ManyToManyField(Parametr, verbose_name="Параметри")
+    # parameters  = models.ManyToManyField(Parametr, verbose_name="Параметри")
     desc        = models.TextField(verbose_name="Опис російською")
     desc_ua     = models.TextField(verbose_name="Опис українською")
     price       = models.IntegerField(verbose_name="Ціна")
@@ -166,6 +170,7 @@ class Offer(models.Model):
         pattern     = re.compile(fr"\b(?:{'|'.join(re.escape(s) for s in SIZES.split())})\b", flags=re.IGNORECASE)
         self.model  = pattern.sub("", self.model).strip()
         self.model  = self.model.replace(",", "")
+        self.model  = self.model.replace("-", "").strip()
         self.model  = re.sub(r'\(\d+\)', '',  self.model)   
 
 
@@ -201,6 +206,28 @@ class Offer(models.Model):
 
         return str(self.offer_type) + " BERSERK SPORT " + str(self.model) + " " + self.color.color_en.lower() + " " + str(self.size) + " (" + self.article + ")"
     
+
+def upload_to(instance, filename):
+    # Генерация пути сохранения файла
+    base_path = "uploads"  # Папка внутри MEDIA_ROOT, куда будут сохраняться файлы
+    filename = os.path.basename(filename)
+    return os.path.join(base_path, filename)
+
+from django.db import models
+
+class UploadFiles(models.Model):
+    class Meta:
+        verbose_name_plural = "Файли"
+
+    file = models.FileField(verbose_name="Файл", upload_to=upload_to) 
+    
+
+    def load(self, func):
+        if self.file: func(xml_file_path=self.file.path)
+    
+    def __str__(self) -> str:
+        if self.file: return self.file.name
+        else: return "No file"
 
 
 class Gender(Enum):
