@@ -12,7 +12,7 @@ EXCLUDES    = [
     "в наявності розмір наличии размер спортивные спортивный флисовая BERSERK SPORT KID компрессионные компресійні для борьбы боротьби",
 ]
 
-
+KIDS_CAT    = "55 85 84 83 79 78 86 80 81 82"
 TYPES_UA    = ["футболка", "бриджі", "штани", "шорти", "лосіни", "костюм", "легінси", "напульсник", "худі", "рашгард", "нарукавник","трико", "світшот", "кофта", "майка", "топ", "індіма", "комбінезон", "реглан"]
 TYPES       = ["футболка", "бриджи", "штаны", "шорты", "костюм", "легинсы", "напульсник", "лосини", "нарукавник", "худи", "рашгард", "трико", "свитшот", "кофта", "майка", "топ", "индима", "комбинезон", "реглан"]
 SIZES       = "m l s xs 2xs 3xs 4xs 5xs xl 2xl 3xl 4xl 5xl xxl xxxl xxs xxxs xsy"
@@ -112,6 +112,7 @@ class Category(models.Model):
     id      = models.BigIntegerField(verbose_name="Айді", primary_key=True)
     name    = models.CharField(max_length=255, verbose_name="Назва")
 
+
     def __str__(self) -> str:
         return self.name
 
@@ -201,10 +202,21 @@ class Offer(models.Model):
         images = "\n".join(images)
         return images
 
+    @property
+    def name_ru(self):
+        if str(self.category.id) in KIDS_CAT.split():
+            return str(self.offer_type.name_ru) + " BERSERK SPORT " + str(self.model) + " " + SIZE_FOR_KIDS.get(self.size.upper(), "146 - 152 см") + " " + self.color.color_en.lower() + " (" + self.article + ")"
+        return str(self.offer_type.name_ru) + " BERSERK SPORT " + str(self.model) + " " + str(self.size) + " " + self.color.color_en.lower() + " (" + self.article + ")" 
+    @property
+    def name_ua(self):
+        if str(self.category.id) in KIDS_CAT.split():
+            return str(self.offer_type.name_ua) + " BERSERK SPORT " + str(self.model) + " " + SIZE_FOR_KIDS.get(self.size.upper(), "146 - 152 см") + " " + self.color.color_en.lower() + " (" + self.article + ")"
+        return str(self.offer_type.name_ua) + " BERSERK SPORT " + str(self.model) + " " + str(self.size) + " " + self.color.color_en.lower() + " (" + self.article + ")"
 
     def __str__(self) -> str:
-
-        return str(self.offer_type) + " BERSERK SPORT " + str(self.model) + " " + self.color.color_en.lower() + " " + str(self.size) + " (" + self.article + ")"
+        if str(self.category.id) in KIDS_CAT.split(): 
+            return str(self.offer_type) + " BERSERK SPORT " + str(self.model) + " " + SIZE_FOR_KIDS.get(self.size.upper(), "146 - 152 см") + " " + self.color.color_en.lower() + " (" + self.article + ")"
+        return str(self.offer_type) + " BERSERK SPORT " + str(self.model) + " " +str(self.size) + " " +  self.color.color_en.lower() + " (" + self.article + ")"
     
 
 def upload_to(instance, filename):
@@ -223,8 +235,9 @@ class UploadFiles(models.Model):
     
 
     def load(self, func):
-        if self.file: func(xml_file_path=self.file.path)
-    
+        if self.file: return func(xml_file_path=self.file.path)
+        else: return "Something went wrong when parsing file"
+
     def __str__(self) -> str:
         if self.file: return self.file.name
         else: return "No file"

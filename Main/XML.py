@@ -5,12 +5,15 @@ from .models import Offer, Category, OfferColor
 def parse_categories(xml_file_path):
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
+    cats = []
     for category_elem in root.findall(".//categories/category"):
         cat = Category()
         cat.name= category_elem.text
     
         cat.id  = int(category_elem.attrib["id"])
         cat.save()
+        cats.append(cat)
+    return str(cats.count())
 
 
 def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
@@ -74,4 +77,4 @@ def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
         offer.save()
     offers.append(offer)
 
-    # return offers
+    return str(offers.count())
