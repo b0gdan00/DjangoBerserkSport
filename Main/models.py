@@ -111,7 +111,8 @@ class Category(models.Model):
     
     id      = models.BigIntegerField(verbose_name="Айді", primary_key=True)
     name    = models.CharField(max_length=255, verbose_name="Назва")
-
+    catCodeEpic = models.IntegerField(verbose_name="Epic Code", blank=True, null=True)
+    catCodeEpicName = models.CharField(max_length=255, verbose_name="Epic Code Name", blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
