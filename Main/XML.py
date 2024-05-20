@@ -13,8 +13,7 @@ def parse_categories(xml_file_path):
         cat.id  = int(category_elem.attrib["id"])
         cat.save()
         cats.append(cat)
-    return str(cats.count())
-
+    return str(len(cats))
 
 def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
 

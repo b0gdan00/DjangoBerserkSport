@@ -41,8 +41,16 @@ class XMLBuilder:
             ET.SubElement(offer_element, "width" ).text = "100"
             ET.SubElement(offer_element, "length").text = "50"
             ET.SubElement(offer_element, "category", attrib={"code": str(offer.category.catCodeEpic)}).text = offer.category.catCodeEpicName
-        
-        
+            ET.SubElement(offer_element, "attribute_set", attrib={"code": str(offer.category.catCodeEpic)}).text = offer.category.catCodeEpicName
+            if offer.iskids: ET.SubElement(offer_element, "param", attrib={"paramcode": "11972", "name": "Зріст"}).text = SIZE_FOR_KIDS.get(offer.size.upper(), "140").split()[0] 
+            ET.SubElement(offer_element, "param", attrib={"paramcode": "measure", "name": "Одиниця"}).text = "шт."
+            ET.SubElement(offer_element, "param", attrib={"paramcode": "brand", "name": "Виробник"}).text = "BERSERK SPORT"
+            ET.SubElement(offer_element, "param", attrib={"paramcode": "35881", "name": "Стиль"}).text = "спортивний"
+            ET.SubElement(offer_element, "param", attrib={"paramcode": "78", "name": "Колір"}).text = offer.color.color_ua.lower()
+            ET.SubElement(offer_element, "param", attrib={"paramcode": "country_of_origin", "name": "Країна-виробник", "valuecode": "ukr"}).text = "Україна"
+
+
+            
         xml_data = ET.tostring(root, encoding="utf-8", method="xml")
         return xml_data
 

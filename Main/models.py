@@ -4,7 +4,7 @@ import re
 from django.conf import settings
 from django.db import models
 from fuzzywuzzy import process
-from googletrans import Translator
+from deep_translator import GoogleTranslator as Translator
 
 
 EXCLUDES    = [
@@ -88,7 +88,9 @@ class OfferColor(models.Model):
     color_ua    = models.CharField(max_length=255, verbose_name="Колір українською")
     color_ru    = models.CharField(max_length=255, verbose_name="Колір російською", blank=True, null=True)
 
-    def translate(self): return Translator().translate(self.color_ua, dest='ru').text.capitalize()
+    def translate(self): 
+        translator = Translator(source='uk', target='ru')
+        return translator.translate(self.color_ua).capitalize()
 
     def save(self, *args, **kwargs) -> None:
 
@@ -161,6 +163,10 @@ class Offer(models.Model):
     images      = models.TextField(verbose_name="Зображення", null=True, blank=True)
     enable      = models.BooleanField(verbose_name="Статус", default=True)
 
+    @property
+    def iskids(self):return False if str(self.category.id) not in KIDS_CAT.split() else True
+
+
     def parseModel(self, name):
         name = name.split()
         cleaned_words = []
@@ -208,6 +214,7 @@ class Offer(models.Model):
         if str(self.category.id) in KIDS_CAT.split():
             return str(self.offer_type.name_ru) + " BERSERK SPORT " + str(self.model) + " " + SIZE_FOR_KIDS.get(self.size.upper(), "146 - 152 см") + " " + self.color.color_en.lower() + " (" + self.article + ")"
         return str(self.offer_type.name_ru) + " BERSERK SPORT " + str(self.model) + " " + str(self.size) + " " + self.color.color_en.lower() + " (" + self.article + ")" 
+    
     @property
     def name_ua(self):
         if str(self.category.id) in KIDS_CAT.split():
