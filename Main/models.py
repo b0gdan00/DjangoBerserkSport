@@ -152,7 +152,7 @@ class Offer(models.Model):
     model       = models.CharField(verbose_name="Модель", max_length=1000)
     size        = models.CharField(verbose_name="Розмір товару", max_length=255, choices=SIZE_CHOICES)
 
-    category    = models.ForeignKey(Category, verbose_name="Категорія", on_delete=models.CASCADE)
+    category    = models.ForeignKey(Category, verbose_name="Категорія", on_delete=models.DO_NOTHING)
     color       = models.ForeignKey(OfferColor, verbose_name="Колір", on_delete=models.CASCADE)
     article     = models.CharField(max_length=100, verbose_name="Артикл")
     # parameters  = models.ManyToManyField(Parametr, verbose_name="Параметри")

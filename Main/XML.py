@@ -6,14 +6,15 @@ def parse_categories(xml_file_path):
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
     cats = []
+    updated = []
     for category_elem in root.findall(".//categories/category"):
-        cat = Category()
-        cat.name= category_elem.text
+        cat, created = Category.objects.get_or_create(id=int(category_elem.attrib["id"]))
+        cat.name = category_elem.text
     
         cat.id  = int(category_elem.attrib["id"])
         cat.save()
-        cats.append(cat)
-    return str(len(cats))
+        cats.append(cat) if created else updated.append(cat)
+    return str(len(cats)), str(len(updated))
 
 def parse_offers(limit=10000, xml_file_path="base.xml", categories = None, ):
 

@@ -30,12 +30,15 @@ def buildEpic(modeladmin, request, queryset):
 
 def loadOffers(modeladmin, request, queryset):
         for upload_file in queryset:
-             modeladmin.message_user(request, "Оновлено: "+upload_file.load(parse_offers)+ " товарів")
+            resp1 = upload_file.load(parse_offers)
+            modeladmin.message_user(request, "Оновлено: "+resp1+ " товарів")
 
 def loadCategories(modeladmin, request, queryset):
         for upload_file in queryset:
+            resp1, resp2 = upload_file.load(parse_categories)
             
-            modeladmin.message_user(request,"Оновлено: "+upload_file.load(parse_categories)+ " категорій")
+            modeladmin.message_user(request, "Створено: "+resp1+ " категорій")
+            modeladmin.message_user(request, "Оновлено: "+resp2+ " категорій")
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):

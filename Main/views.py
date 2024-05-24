@@ -11,7 +11,8 @@ from django.contrib.auth.decorators import user_passes_test
 def index(request):
     offers = Offer.objects.all()
     context = {"name": "Main", "offers": offers}
-    return render(request, 'Main/index.html' , context)
+    # return render(request, 'Main/index.html' , context)
+    return redirect("/admin/")
 
 @user_passes_test(lambda u: u.is_superuser)
 def import_file(request):
